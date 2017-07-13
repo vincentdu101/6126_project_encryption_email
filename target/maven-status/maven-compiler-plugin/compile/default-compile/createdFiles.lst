@@ -1,1 +1,4 @@
 encryption\Setup.class
+main\java\MainMVCConfiguration.class
+main\java\HomeController.class
+main\java\MainMVCInitializer.class
