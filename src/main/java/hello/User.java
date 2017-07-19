@@ -8,29 +8,33 @@ public class User {
 
     @NotNull
     @Size(min=2, max=30)
-    private String name;
+    private String username;
 
     @NotNull
-    @Min(18)
-    private Integer age;
+    @Min(10)
+    private String password;
 
-    public String getName() {
-        return this.name;
+    public User() {}
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getUsername() {
+        return username;
     }
 
-    public Integer getAge() {
-        return age;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public void setAge(Integer age) {
-        this.age = age;
+    public String getPassword() {
+        return password;
     }
 
-    public String toString() {
-        return "Person(Name: " + this.name + ", Age: " + this.age + ")";
+    public void setPassword(String password) {
+        this.password = password;
     }
+
 }
