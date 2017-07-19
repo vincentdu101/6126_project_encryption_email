@@ -12,7 +12,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
@@ -49,7 +51,7 @@ public class KeyUtils {
 	 * @parameter password the user's password
 	 * 
 	 */
-	public static void createNewUserKeys(String id, String password)
+	public static Map<String, String> createNewUserKeys(String id, String password)
 			throws PGPException, IOException, NoSuchAlgorithmException, NoSuchProviderException {
 		if (Security.getProvider("BC") == null) {
 			Security.addProvider(new BouncyCastleProvider());
@@ -73,7 +75,13 @@ public class KeyUtils {
 		PGPSecretKeyRingCollection secRings = getSecretKeyRingColl();
 		PGPSecretKeyRingCollection updatedSecRings = PGPSecretKeyRingCollection.addSecretKeyRing(secRings, secKeyRing);
 
-		saveCollectionFiles(updatedPubRings, updatedSecRings);
+//		saveCollectionFiles(updatedPubRings, updatedSecRings);
+		Map<String, String> output = new HashMap<>();
+
+		output.put("public", getPublicKey(updatedPubRings));
+		output.put("private", getPrivateKey(updatedSecRings));
+
+		return output;
 	}
 
 	/*
@@ -163,6 +171,16 @@ public class KeyUtils {
 		secOut = new ArmoredOutputStream(secOut);
 		skr.encode(secOut);
 		secOut.close();
+	}
+
+	private static String getPublicKey(PGPPublicKeyRingCollection pkr)
+			throws IOException {
+		return pkr.getEncoded().toString();
+	}
+
+	private static String getPrivateKey(PGPSecretKeyRingCollection skr)
+			throws IOException {
+		return skr.getEncoded().toString();
 	}
 
 	/*

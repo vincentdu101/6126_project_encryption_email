@@ -9,11 +9,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 @Controller
 public class WebController extends WebMvcConfigurerAdapter {
+
+    private PgpAlgorithmUtils pgp = new PgpAlgorithmUtils();
+    private KeyUtils keyUtils = new KeyUtils();
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
@@ -70,5 +76,26 @@ public class WebController extends WebMvcConfigurerAdapter {
 
 
         return "redirect:/messages";
+    }
+
+    @PostMapping("/register")
+    public String registerUser(@Valid User user, BindingResult bindingResult) {
+
+        Map<String, String> keys = new HashMap<>();
+
+//        if (bindingResult.hasErrors()) {
+//            return "register";
+//        }
+
+        try {
+            keys = keyUtils.createNewUserKeys("1", user.getPassword());
+        } catch(Exception exception) {
+            System.out.println(exception.getMessage());
+            return "register";
+        }
+
+        System.out.println(keys.get("public") + " " + keys.get("private"));
+
+        return "redirect:/receivedMessages";
     }
 }
