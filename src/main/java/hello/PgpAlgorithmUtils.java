@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Date;
@@ -16,7 +15,6 @@ import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
 import org.bouncycastle.openpgp.PGPEncryptedDataList;
-import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPLiteralData;
 import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
 import org.bouncycastle.openpgp.PGPPrivateKey;
@@ -36,42 +34,44 @@ public class PgpAlgorithmUtils {
 	 * 
 	 * @param ciphertext the ciphertext to be decrypted
 	 * 
-	 * @param receiverId the receiver's user id
+	 * @param privateKeyBytes the receiver's private key as a byte array
 	 * 
-	 * @param receiverPassword the receiver's password
+	 * @param password the receiver's password
 	 * 
 	 * @return the decrypted text
+	 * 
+	 * code based on
+	 * https://github.com/bcgit/bc-java/blob/master/pg/src/main/java/org/
+	 * bouncycastle/openpgp/examples/ByteArrayHandler.java
 	 */
-	// code based on
-	// https://github.com/bcgit/bc-java/blob/master/pg/src/main/java/org/bouncycastle/openpgp/examples/ByteArrayHandler.java
-	public static String decrypt(String ciphertext, String receiverID, String receiverPassword)
-			throws IOException, NoSuchProviderException, PGPException {
+	public static String decrypt(String ciphertext, byte[] privateKeyBytes, String password) {
 		if (Security.getProvider("BC") == null) {
 			Security.addProvider(new BouncyCastleProvider());
 		}
-		
-		PGPPrivateKey privateKey = KeyUtils.getPrivateKey(receiverID, receiverPassword);
+		PGPPrivateKey privateKey = KeyUtils.getPrivateKey(privateKeyBytes, password);
+		;
 		if (privateKey == null) {
-			return "***ERROR: Unable to decrypt message - key***";
+			return "***ERROR: Unable to decrypt message - problem with key***";
 		}
-		InputStream in = new ByteArrayInputStream(ciphertext.getBytes());
-		in = PGPUtil.getDecoderStream(in);
-
-		JcaPGPObjectFactory pgpF = new JcaPGPObjectFactory(in);
-		PGPEncryptedDataList enc;
-
-		Object o = pgpF.nextObject();
-		//
-		// the first object might be a PGP marker packet.
-		//
-		if (o instanceof PGPEncryptedDataList) {
-			enc = (PGPEncryptedDataList) o;
-		} else {
-			enc = (PGPEncryptedDataList) pgpF.nextObject();
-		}
-
-		PGPPublicKeyEncryptedData pbe = (PGPPublicKeyEncryptedData) enc.get(0);
 		try {
+			InputStream in = new ByteArrayInputStream(ciphertext.getBytes());
+			in = PGPUtil.getDecoderStream(in);
+
+			JcaPGPObjectFactory pgpF = new JcaPGPObjectFactory(in);
+			PGPEncryptedDataList enc;
+
+			Object o = pgpF.nextObject();
+			//
+			// the first object might be a PGP marker packet.
+			//
+			if (o instanceof PGPEncryptedDataList) {
+				enc = (PGPEncryptedDataList) o;
+			} else {
+				enc = (PGPEncryptedDataList) pgpF.nextObject();
+			}
+
+			PGPPublicKeyEncryptedData pbe = (PGPPublicKeyEncryptedData) enc.get(0);
+
 			InputStream clear = pbe
 					.getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(privateKey));
 
@@ -82,7 +82,7 @@ public class PgpAlgorithmUtils {
 
 			byte[] output = Streams.readAll(ld.getInputStream());
 			return new String(output);
-		} catch (PGPException e) {
+		} catch (Exception e) {
 			return "***ERROR: Unable to decrypt message***";
 		}
 	}
@@ -92,43 +92,49 @@ public class PgpAlgorithmUtils {
 	 * 
 	 * @param plaintext the plaintext to be encrypted
 	 * 
-	 * @param receiverId the receiver's id
+	 * @param publicKeyBytes the receiver's public key as a byte array
 	 * 
-	 * @return the encrypted text
+	 * @return the encrypted text code based on
+	 * https://github.com/bcgit/bc-java/blob/master/pg/src/main/java/org/
+	 * bouncycastle/openpgp/examples/ByteArrayHandler.java
 	 */
-	// code based on
-	// https://github.com/bcgit/bc-java/blob/master/pg/src/main/java/org/bouncycastle/openpgp/examples/ByteArrayHandler.java
-	public static String encrypt(String plaintext, String receiverID) throws IOException, PGPException {
+	public static String encrypt(String plaintext, byte[] publicKeyBytes) {
 		if (Security.getProvider("BC") == null) {
 			Security.addProvider(new BouncyCastleProvider());
 		}
-		PGPPublicKey publicKey = KeyUtils.getPublicKey(receiverID);
+		PGPPublicKey publicKey = KeyUtils.getPublicKey(publicKeyBytes);
 
 		byte[] original = plaintext.getBytes();
 		int algorithm = PGPEncryptedDataGenerator.AES_128;
 
-		byte[] compressedData = compress(original, PGPLiteralData.CONSOLE, CompressionAlgorithmTags.ZIP);
+		try {
+			byte[] compressedData = compress(original, PGPLiteralData.CONSOLE, CompressionAlgorithmTags.ZIP);
 
-		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-		OutputStream out = bOut;
-		out = new ArmoredOutputStream(out);
+			ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+			OutputStream out = bOut;
+			out = new ArmoredOutputStream(out);
 
-		PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
-				new JcePGPDataEncryptorBuilder(algorithm).setSecureRandom(new SecureRandom()).setProvider("BC"));
-		encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(publicKey).setProvider("BC"));
+			PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
+					new JcePGPDataEncryptorBuilder(algorithm).setSecureRandom(new SecureRandom()).setProvider("BC"));
+			encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(publicKey).setProvider("BC"));
 
-		OutputStream encOut = encGen.open(out, compressedData.length);
-		encOut.write(compressedData);
-		encOut.close();
+			OutputStream encOut = encGen.open(out, compressedData.length);
+			encOut.write(compressedData);
+			encOut.close();
+			out.close();
 
-		out.close();
-
-		byte[] output = bOut.toByteArray();
-		return new String(output);
+			byte[] output = bOut.toByteArray();
+			return new String(output);
+		} catch (Exception e) {
+			return "***ERROR: Unable to encrypt message***";
+		}
 	}
 
-	// code from
-	// https://github.com/bcgit/bc-java/blob/master/pg/src/main/java/org/bouncycastle/openpgp/examples/ByteArrayHandler.java
+	/*
+	 * code from
+	 * https://github.com/bcgit/bc-java/blob/master/pg/src/main/java/org/
+	 * bouncycastle/openpgp/examples/ByteArrayHandler.java
+	 */
 	private static byte[] compress(byte[] clearData, String fileName, int algorithm) throws IOException {
 		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 		PGPCompressedDataGenerator comData = new PGPCompressedDataGenerator(algorithm);
@@ -144,9 +150,7 @@ public class PgpAlgorithmUtils {
 		);
 		pOut.write(clearData);
 		pOut.close();
-
 		comData.close();
-
 		return bOut.toByteArray();
 	}
 }
