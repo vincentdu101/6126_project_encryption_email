@@ -1,42 +1,53 @@
 package hello;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import javax.persistence.Lob;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Entity
 public class User {
 
 	@Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private int id;
-	
-    @NotNull
-    @Size(min=2, max=30)
-    private String username;
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int id;
 
-    @NotNull
-    @Min(10)
-    private String password;
-    
-    @Lob
-    private byte[] publicKey;
-    @Lob
-    private byte[] privateKey;
+	@NotNull
+	@Size(min = 2, max = 30)
+	@Column(unique = true)
+	private String username;
 
-    public User() {}
+	// @Transient - this variable won't be added to the database
+	@Transient
+	@NotNull
+	@Size(min = 3)
+	private String password;
 
-    public User(String username, String password) {
-        this.username = username;
-        this.password = password;
-    }
+	@NotNull
+	private String passwordHash;
 
-    public int getId() {
+	@NotNull
+	@Lob
+	private byte[] publicKey;
+
+	@NotNull
+	@Lob
+	private byte[] privateKey;
+
+	public User() {
+	}
+
+	public User(String username, String password) {
+		this.username = username;
+		this.password = password;
+	}
+
+	public int getId() {
 		return id;
 	}
 
@@ -44,23 +55,30 @@ public class User {
 		this.id = id;
 	}
 
-    public String getUsername() {
-        return username;
-    }
+	public String getUsername() {
+		return username;
+	}
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    //TODO - salt and hash before adding to database
-    public void setPassword(String password) {
-        this.password = password;
-    }
-    
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getPasswordHash() {
+		return passwordHash;
+	}
+
+	public void setPasswordHash(String passwordHash) {
+		this.passwordHash = passwordHash;
+	}
+
 	public byte[] getPublicKey() {
 		return publicKey;
 	}
@@ -76,11 +94,10 @@ public class User {
 	public void setPrivateKey(byte[] privateKey) {
 		this.privateKey = privateKey;
 	}
-	
+
 	@Override
-    public String toString() {
-        return String.format(
-                "User[id=%d, username='%s', password='%s', public key=%s, private key=%s]",
-                id, username, password, publicKey, privateKey);
-    }
+	public String toString() {
+		return String.format("User[id=%d, username='%s', password='%s', public key=%s, private key=%s]", id, username,
+				password, publicKey, privateKey);
+	}
 }
