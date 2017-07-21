@@ -6,11 +6,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
+@Table(name = "[user]")
 public class User {
 
 	@Id
@@ -98,6 +100,6 @@ public class User {
 	@Override
 	public String toString() {
 		return String.format("User[id=%d, username='%s', password='%s', public key=%s, private key=%s]", id, username,
-				password, publicKey, privateKey);
+				passwordHash, publicKey, privateKey);
 	}
 }
