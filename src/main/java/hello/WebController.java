@@ -11,6 +11,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -96,6 +97,10 @@ public class WebController extends WebMvcConfigurerAdapter {
 		}
 		return "redirect:/receivedMessages";
 	}
+	
+	public String redirectToReceived() {
+		return "redirect:/receivedMessages";
+	}
 
 	// TEST URL FOR NEW USER
 	@GetMapping("/checknewuser")
@@ -103,4 +108,46 @@ public class WebController extends WebMvcConfigurerAdapter {
 		User user = userService.getUser("user");
 		return new ModelAndView("checknewuser", "user", user);
 	}
+	
+	@RequestMapping("/validateuser")
+	public ModelAndView displayStuff() {
+		String s = null;
+		System.out.println("S: " + s);
+		User user = userService.getUser("user");
+		//System.out.println(user);
+		
+		//valid user
+		s = userService.validateUser("user","$2a$10$j2bNPIpbbERHK/B.ZKSukOzMU1U7/pG/t1g9avfU3QEe5JPBbLvF6");
+		
+		//non-valid user
+		//s = userService.validateUser("user","$2a$10$j2bNPIpbbERHK/B.ZKSukOzMU1U7/pG/t1g9avfU3QEe5");
+		
+		if(s == null) {s = "0";}
+		System.out.println("S: " + s);
+		ModelAndView MV = new ModelAndView("/sentMessages");
+		if(s == "1") 
+			{
+			MV = new ModelAndView("/sentMessages");
+			}
+		else if(s == "0") 
+			{
+			User UnValuser = userService.getUser("");
+			MV = new ModelAndView("signin","user",UnValuser);
+			}
+		
+		return MV;
+	}
+	
+	@RequestMapping("/hello")
+	public ModelAndView sayHi() {
+		User user = userService.getUser("user");
+		return new ModelAndView("signin","user",user);
+	}
+	
+	
+	@RequestMapping("/12345")
+	public String display2Stuff() {
+		return "123";
+	}
+
 }
