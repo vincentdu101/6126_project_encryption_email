@@ -1,10 +1,14 @@
 package hello;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
 
+import org.bouncycastle.openpgp.PGPException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -24,6 +28,9 @@ public class WebController extends WebMvcConfigurerAdapter {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private MessageService messageService;
+
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addViewController("/allMessages").setViewName("allMessages");
@@ -42,30 +49,53 @@ public class WebController extends WebMvcConfigurerAdapter {
 	}
 
 	@GetMapping("/receivedMessages")
-	public String viewReceivedMessages(final ModelMap model) {
+	public String viewReceivedMessages(final ModelMap model) throws NoSuchAlgorithmException, NoSuchProviderException,
+			PGPException, IOException, NonUniqueUsernameException {
 
+		/*
+		 * List<Message> messages = new ArrayList<>(); User sender = new
+		 * User("omega@ymail.com", "omg"); messages.add(new Message(1, "HI",
+		 * "odssdfosdf34234234", sender)); messages.add(new Message(2,
+		 * "HI there world", "odssdfosdasdsdf34234234", sender));
+		 * messages.add(new Message(3, "Hello world",
+		 * "odssdfossddsfdasdsdf34234234", sender));
+		 */
+
+		User omega = new User("omega@ymail.com", "omg");
+		userService.addUser(omega);
+		User alpha = new User("alpha@ymail.com", "alp");
+		userService.addUser(alpha);
+
+		Message m1 = new Message("HI", omega, alpha);
+		messageService.addMessage(m1);
+		Message m2 = new Message("Hi there alpha", omega, alpha);
+		messageService.addMessage(m2);
+		Message m3 = new Message("Hello omega", alpha, omega);
+		messageService.addMessage(m3);
+
+		User loggedIn = userService.getUser("omega@ymail.com");
 		List<Message> messages = new ArrayList<>();
-		User sender = new User("omega@ymail.com", "omg");
-		messages.add(new Message(1, "HI", "odssdfosdf34234234", sender));
-		messages.add(new Message(2, "HI there world", "odssdfosdasdsdf34234234", sender));
-		messages.add(new Message(3, "Hello world", "odssdfossddsfdasdsdf34234234", sender));
-
+		messages = messageService.getUsersReceivedMessages(loggedIn);
 		model.addAttribute("messages", messages);
-
 		return "receivedMessages";
 	}
 
 	@GetMapping("/sentMessages")
 	public String viewSentMessages(final ModelMap model) {
 
+		/*
+		 * List<Message> messages = new ArrayList<>(); User sender = new
+		 * User("omega@ymail.com", "omg"); messages.add(new Message(1, "HI",
+		 * "odssdfosdf34234234", sender)); messages.add(new Message(2,
+		 * "HI there world", "odssdfosdasdsdf34234234", sender));
+		 * messages.add(new Message(3, "Hello world",
+		 * "odssdfossddsfdasdsdf34234234", sender));
+		 */
+
+		User loggedIn = userService.getUser("omega@ymail.com");
 		List<Message> messages = new ArrayList<>();
-		User sender = new User("omega@ymail.com", "omg");
-		messages.add(new Message(1, "HI", "odssdfosdf34234234", sender));
-		messages.add(new Message(2, "HI there world", "odssdfosdasdsdf34234234", sender));
-		messages.add(new Message(3, "Hello world", "odssdfossddsfdasdsdf34234234", sender));
-
+		messages = messageService.getUsersSentMessages(loggedIn);
 		model.addAttribute("messages", messages);
-
 		return "sentMessages";
 	}
 

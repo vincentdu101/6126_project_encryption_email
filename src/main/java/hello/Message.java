@@ -2,63 +2,125 @@ package hello;
 
 import java.time.LocalDate;
 
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+
 /**
  * Created by vincentdu on 7/17/17.
  */
+
+@Entity
 public class Message {
 
-    private final int id;
-    private final String plaintext;
-    private final String ciphertext;
-    private LocalDate created = LocalDate.now();
-    private LocalDate modified = LocalDate.now();
-    private final User sender;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int id;
 
-    public Message(int id, String plaintext, String ciphertext, LocalDate created, LocalDate modified, User sender) {
-        this.id = id;
-        this.plaintext = plaintext;
-        this.ciphertext = ciphertext;
-        this.created = created;
-        this.modified = modified;
-        this.sender = sender;
-    }
+	// @Transient
+	private String plaintext;
 
-    public Message(int id, String plaintext, String ciphertext, User sender) {
-        this.id = id;
-        this.plaintext = plaintext;
-        this.ciphertext = ciphertext;
-        this.sender = sender;
-    }
+	@Lob
+	private String sendCiphertext;
 
-    public LocalDate getCreated() {
-        return created;
-    }
+	@Lob
+	private String recCiphertext;
 
-    public void setCreated(LocalDate created) {
-        this.created = created;
-    }
+	private LocalDate created = LocalDate.now();
+	private LocalDate modified = LocalDate.now();
 
-    public LocalDate getModified() {
-        return modified;
-    }
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "sender_id")
+	private User sender;
 
-    public User getSender() {
-        return sender;
-    }
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "receiver_id")
+	private User receiver;
 
-    public void setModified(LocalDate modified) {
-        this.modified = modified;
-    }
+	protected Message() {
+	}
 
-    public String getPlaintext() {
-        return plaintext;
-    }
+	public Message(String plaintext, User sender, User receiver) {
+		this.plaintext = plaintext;
+		this.sender = sender;
+		this.receiver = receiver;
+	}
 
-    public String getCiphertext() {
-        return ciphertext;
-    }
+	// probably can remove these 2 ctors
+	/*
+	 * public Message(int id, String plaintext, String ciphertext, LocalDate
+	 * created, LocalDate modified, User sender) { this.id = id; this.plaintext
+	 * = plaintext; this.ciphertext = ciphertext; this.created = created;
+	 * this.modified = modified; this.sender = sender; }
+	 * 
+	 * public Message(int id, String plaintext, String ciphertext, User sender)
+	 * { this.id = id; this.plaintext = plaintext; this.ciphertext = ciphertext;
+	 * this.sender = sender; }
+	 */
 
-    public int getId() {
-        return id;
-    }
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public LocalDate getCreated() {
+		return created;
+	}
+
+	public void setCreated(LocalDate created) {
+		this.created = created;
+	}
+
+	public LocalDate getModified() {
+		return modified;
+	}
+
+	public void setModified(LocalDate modified) {
+		this.modified = modified;
+	}
+
+	public User getSender() {
+		return sender;
+	}
+
+	public void setSender(User sender) {
+		this.sender = sender;
+	}
+
+	public User getReceiver() {
+		return receiver;
+	}
+
+	public void setReceiver(User receiver) {
+		this.receiver = receiver;
+	}
+
+	public String getPlaintext() {
+		return plaintext;
+	}
+
+	public String getSendCiphertext() {
+		return sendCiphertext;
+	}
+
+	public void setSendCiphertext(String sendCiphertext) {
+		this.sendCiphertext = sendCiphertext;
+	}
+
+	public String getRecCiphertext() {
+		return recCiphertext;
+	}
+
+	public void setRecCiphertext(String recCiphertext) {
+		this.recCiphertext = recCiphertext;
+	}
 }
