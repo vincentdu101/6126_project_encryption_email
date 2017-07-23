@@ -21,7 +21,10 @@ public class UserService {
 	public User getUser(String username) {
 		return userRepo.findByUsername(username);
 	}
-	
+
+	public User getUserById(String userId) {
+		return userRepo.findById();
+	}
 
 	public void addUser(User user) throws NoSuchAlgorithmException, NoSuchProviderException, PGPException, IOException,
 			NonUniqueUsernameException {

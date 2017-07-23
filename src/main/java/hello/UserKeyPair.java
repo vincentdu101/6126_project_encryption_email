@@ -25,11 +25,11 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
 public class UserKeyPair {
 	private byte[] privateKey;
 	private byte[] publicKey;
-	private String id;
+	private String username;
 	private String password;
 	
-	public UserKeyPair(String id, String password) throws NoSuchAlgorithmException, NoSuchProviderException, PGPException, IOException {
-		this.id = id;
+	public UserKeyPair(String username, String password) throws NoSuchAlgorithmException, NoSuchProviderException, PGPException, IOException {
+		this.username = username;
 		this.password = password;
 		createNewUserKeyStrings();
 	}
@@ -56,7 +56,7 @@ public class UserKeyPair {
 		KeyPair kp = createKeyPair();
 		PGPDigestCalculator sha1Calc = new JcaPGPDigestCalculatorProviderBuilder().build().get(HashAlgorithmTags.SHA1);
 		PGPKeyPair keyPair = new JcaPGPKeyPair(PGPPublicKey.RSA_GENERAL, kp, new Date());
-		PGPSecretKey secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, keyPair, id, sha1Calc, null, null,
+		PGPSecretKey secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, keyPair, username, sha1Calc, null, null,
 				new JcaPGPContentSignerBuilder(keyPair.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1),
 				new JcePBESecretKeyEncryptorBuilder(PGPEncryptedData.AES_128, sha1Calc).setProvider("BC")
 						.build(pwArray));

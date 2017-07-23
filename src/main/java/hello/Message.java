@@ -43,12 +43,17 @@ public class Message {
 	@JoinColumn(name = "receiver_id")
 	private User receiver;
 
-	protected Message() {
+	public Message() {
 	}
 
 	public Message(String plaintext, User sender, User receiver) {
 		this.plaintext = plaintext;
 		this.sender = sender;
+		this.receiver = receiver;
+	}
+
+	public Message(User receiver, String plaintext) {
+		this.plaintext = plaintext;
 		this.receiver = receiver;
 	}
 
@@ -107,6 +112,8 @@ public class Message {
 	public String getPlaintext() {
 		return plaintext;
 	}
+
+	public void setPlaintext(String plaintext) { this.plaintext = plaintext; }
 
 	public String getSendCiphertext() {
 		return sendCiphertext;

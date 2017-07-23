@@ -19,25 +19,30 @@ public class UserService {
 	@Autowired
 	private UserRepository userRepo;
 
+	private User parseUserWithKeys(User user, UserKeyPair keyPair) {
+        user.setPublicKey(keyPair.getPublicKey());
+        user.setPrivateKey(keyPair.getPrivateKey());
+
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
+        return user;
+    }
+
 	public User getUser(String username) {
 		return userRepo.findByUsername(username);
 	}
-	
+
+	public User getUserById(String userId) {
+	    return userRepo.findOne(Integer.parseInt(userId));
+    }
 
 	public void addUser(User user) throws NoSuchAlgorithmException, NoSuchProviderException, PGPException, IOException,
 			NonUniqueUsernameException {
 		if (getUser(user.getUsername()) != null) {
 			throw new NonUniqueUsernameException("duplicate username");
 		}
-
-		UserKeyPair keyPair = new UserKeyPair(user.getUsername(), user.getPassword());
-		user.setPublicKey(keyPair.getPublicKey());
-		user.setPrivateKey(keyPair.getPrivateKey());
-
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
-
-		userRepo.save(user);
+        UserKeyPair keyPair = new UserKeyPair(user.getUsername(), user.getPassword());
+		userRepo.save(parseUserWithKeys(user, keyPair));
 	}
 
 	public List<User> getAllUsers(User currentUser) {
@@ -77,4 +82,12 @@ public class UserService {
 		System.out.println("validateUser method done...");
 		return var2;
 	}
+
+	public boolean verifyPassword(User firstUser, User comparedUser) throws NoSuchAlgorithmException, NoSuchProviderException, PGPException, IOException {
+        UserKeyPair keyPair = new UserKeyPair(comparedUser.getUsername(), comparedUser.getPassword());
+        comparedUser = parseUserWithKeys(comparedUser, keyPair);
+        System.out.println(firstUser.getPrivateKey().toString());
+        System.out.println(comparedUser.getPrivateKey().toString());
+        return firstUser.getPrivateKey().toString().equals(comparedUser.getPrivateKey().toString());
+    }
 }

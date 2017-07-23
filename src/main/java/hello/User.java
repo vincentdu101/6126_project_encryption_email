@@ -28,7 +28,7 @@ public class User {
 	private String username;
 
 	// @Transient - this variable won't be added to the database
-	@Transient
+//	@Transient
 	@NotNull
 	@Size(min = 3)
 	private String password;

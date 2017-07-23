@@ -6,16 +6,20 @@ import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.bouncycastle.openpgp.PGPException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -91,13 +95,22 @@ public class WebController extends WebMvcConfigurerAdapter {
 	}
 
 	@PostMapping("/")
-	public String checkPersonInfo(@Valid User user, BindingResult bindingResult) {
+	public String loginAction(@RequestParam String username, @RequestParam String password) {
 
-		if (bindingResult.hasErrors()) {
-			return "form";
-		}
+        try {
+            User user = new User(username, password);
+            User foundUser = userService.getUser(username);
+            if (userService.verifyPassword(foundUser, user)) {
+                currentUser = foundUser;
+            } else {
+                return "redirect:/";
+            }
+        } catch(Exception exception) {
+            System.out.println(exception.getMessage());
+            return "redirect:/";
+        }
 
-		return "redirect:/messages";
+		return "redirect:/receivedMessages";
 	}
 
 	@PostMapping("/register")
@@ -135,9 +148,11 @@ public class WebController extends WebMvcConfigurerAdapter {
 
 
 	@PostMapping("/newMessage")
-	public String sendNewMessage(@Valid Message message, BindingResult bindingResult) {
-
-		message.setSender(currentUser);
+	public String sendNewMessage(@RequestParam String receiverId, @RequestParam String plaintext) {
+	    Message message = new Message();
+	    message.setSender(currentUser);
+	    message.setReceiver(userService.getUserById(receiverId));
+	    message.setPlaintext(plaintext);
 
 		try {
 			messageService.addMessage(message);
