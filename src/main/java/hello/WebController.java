@@ -96,7 +96,9 @@ public class WebController extends WebMvcConfigurerAdapter {
 
 	@PostMapping("/")
 	public String loginAction(@RequestParam String username, @RequestParam String password) {
-		if (userService.verifyPassword(username, password)) {
+		User logIn = userService.verifyPassword(username, password);
+		if (logIn != null) {
+			currentUser = logIn;
 			return "redirect:/receivedMessages";
 		}
 		else {

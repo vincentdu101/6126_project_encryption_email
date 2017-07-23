@@ -83,15 +83,20 @@ public class UserService {
 		return var2;
 	}
 
-	public boolean verifyPassword(String username, String password) {
+	public User verifyPassword(String username, String password) {
 		User loggingIn = getUser(username);
 		if (loggingIn == null) {
-			return false;
+			return null;
 		}
 		else {
 			String hash = loggingIn.getPasswordHash();
 			BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-			return passwordEncoder.matches(password, hash);
+			if (passwordEncoder.matches(password, hash)) {
+				return loggingIn;
+			}
+			else {
+				return null;
+			}
 		}
     }
 }
