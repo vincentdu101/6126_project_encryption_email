@@ -83,11 +83,15 @@ public class UserService {
 		return var2;
 	}
 
-	public boolean verifyPassword(User firstUser, User comparedUser) throws NoSuchAlgorithmException, NoSuchProviderException, PGPException, IOException {
-        UserKeyPair keyPair = new UserKeyPair(comparedUser.getUsername(), comparedUser.getPassword());
-        comparedUser = parseUserWithKeys(comparedUser, keyPair);
-        System.out.println(firstUser.getPrivateKey().toString());
-        System.out.println(comparedUser.getPrivateKey().toString());
-        return firstUser.getPrivateKey().toString().equals(comparedUser.getPrivateKey().toString());
+	public boolean verifyPassword(String username, String password) {
+		User loggingIn = getUser(username);
+		if (loggingIn == null) {
+			return false;
+		}
+		else {
+			String hash = loggingIn.getPasswordHash();
+			BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+			return passwordEncoder.matches(password, hash);
+		}
     }
 }

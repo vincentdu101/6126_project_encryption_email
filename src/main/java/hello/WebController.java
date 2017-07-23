@@ -96,8 +96,14 @@ public class WebController extends WebMvcConfigurerAdapter {
 
 	@PostMapping("/")
 	public String loginAction(@RequestParam String username, @RequestParam String password) {
-
-        try {
+		if (userService.verifyPassword(username, password)) {
+			return "redirect:/receivedMessages";
+		}
+		else {
+			return "redirect:/";
+		}
+		
+        /*try {
             User user = new User(username, password);
             User foundUser = userService.getUser(username);
             if (userService.verifyPassword(foundUser, user)) {
@@ -110,7 +116,7 @@ public class WebController extends WebMvcConfigurerAdapter {
             return "redirect:/";
         }
 
-		return "redirect:/receivedMessages";
+		return "redirect:/receivedMessages";*/
 	}
 
 	@PostMapping("/register")
