@@ -68,9 +68,8 @@ public class WebController extends WebMvcConfigurerAdapter {
 		 * "odssdfossddsfdasdsdf34234234", sender));
 		 */
 
-		User loggedIn = userService.getUser("omega@ymail.com");
 		List<Message> messages = new ArrayList<>();
-		messages = messageService.getUsersReceivedMessages(loggedIn);
+		messages = messageService.getUsersReceivedMessages(currentUser);
 		model.addAttribute("messages", messages);
 		return "receivedMessages";
 	}
@@ -86,10 +85,8 @@ public class WebController extends WebMvcConfigurerAdapter {
 		 * messages.add(new Message(3, "Hello world",
 		 * "odssdfossddsfdasdsdf34234234", sender));
 		 */
-
-		User loggedIn = userService.getUser("omega@ymail.com");
 		List<Message> messages = new ArrayList<>();
-		messages = messageService.getUsersSentMessages(loggedIn);
+		messages = messageService.getUsersSentMessages(currentUser);
 		model.addAttribute("messages", messages);
 		return "sentMessages";
 	}
