@@ -49,8 +49,7 @@ public class WebController extends WebMvcConfigurerAdapter {
 	}
 
 	@GetMapping("/receivedMessages")
-	public String viewReceivedMessages(final ModelMap model) throws NoSuchAlgorithmException, NoSuchProviderException,
-			PGPException, IOException, NonUniqueUsernameException {
+	public String viewReceivedMessages(final ModelMap model) {
 
 		/*
 		 * List<Message> messages = new ArrayList<>(); User sender = new
@@ -60,18 +59,6 @@ public class WebController extends WebMvcConfigurerAdapter {
 		 * messages.add(new Message(3, "Hello world",
 		 * "odssdfossddsfdasdsdf34234234", sender));
 		 */
-
-		User omega = new User("omega@ymail.com", "omg");
-		userService.addUser(omega);
-		User alpha = new User("alpha@ymail.com", "alp");
-		userService.addUser(alpha);
-
-		Message m1 = new Message("HI", omega, alpha);
-		messageService.addMessage(m1);
-		Message m2 = new Message("Hi there alpha", omega, alpha);
-		messageService.addMessage(m2);
-		Message m3 = new Message("Hello omega", alpha, omega);
-		messageService.addMessage(m3);
 
 		User loggedIn = userService.getUser("omega@ymail.com");
 		List<Message> messages = new ArrayList<>();
@@ -139,15 +126,40 @@ public class WebController extends WebMvcConfigurerAdapter {
 		return new ModelAndView("checknewuser", "user", user);
 	}
 	
+	// ROUTE FOR ADDING TEST USER AND MESSAGE VALUES
+	@GetMapping("/addtestvalues")
+	public String addTestValues() throws NoSuchAlgorithmException, NoSuchProviderException, PGPException, IOException, NonUniqueUsernameException {
+		User user = new User("user", "abc");
+		userService.addUser(user);
+		
+		User omega = new User("omega@ymail.com", "omg");
+		userService.addUser(omega);
+		User alpha = new User("alpha@ymail.com", "alp");
+		userService.addUser(alpha);
+
+		Message m1 = new Message("HI", omega, alpha);
+		messageService.addMessage(m1);
+		Message m2 = new Message("Hi there alpha", omega, alpha);
+		messageService.addMessage(m2);
+		Message m3 = new Message("Hello omega", alpha, omega);
+		messageService.addMessage(m3);
+		
+		return "redirect:/receivedMessages";
+	}
+	
+	
 	@RequestMapping("/validateuser")
 	public ModelAndView displayStuff() {
 		String s = null;
 		System.out.println("S: " + s);
-		User user = userService.getUser("user");
-		//System.out.println(user);
+		
+		User loggingIn = userService.getUser("omega@ymail.com");
+		String username = loggingIn.getUsername();
+		String pwordHash = loggingIn.getPasswordHash();
 		
 		//valid user
-		s = userService.validateUser("user","$2a$10$j2bNPIpbbERHK/B.ZKSukOzMU1U7/pG/t1g9avfU3QEe5JPBbLvF6");
+		s = userService.validateUser(username,pwordHash);
+		//s = userService.validateUser("user","$2a$10$j2bNPIpbbERHK/B.ZKSukOzMU1U7/pG/t1g9avfU3QEe5JPBbLvF6");
 		
 		//non-valid user
 		//s = userService.validateUser("user","$2a$10$j2bNPIpbbERHK/B.ZKSukOzMU1U7/pG/t1g9avfU3QEe5");
