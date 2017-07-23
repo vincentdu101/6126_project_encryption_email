@@ -20,8 +20,13 @@ import hello.UserService.NonUniqueUsernameException;
 @Controller
 public class WebController extends WebMvcConfigurerAdapter {
 
+	User currentUser;
+
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private MessageService messageService;
 
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
@@ -30,13 +35,15 @@ public class WebController extends WebMvcConfigurerAdapter {
 
 	@GetMapping("/")
 	public String signinForm(final ModelMap model) {
-		model.addAttribute("user", new User());
+		currentUser = new User();
+		model.addAttribute("user", currentUser);
 		return "signin";
 	}
 
 	@GetMapping("/register")
 	public String registerForm(final ModelMap model) {
-		model.addAttribute("user", new User());
+		currentUser = new User();
+		model.addAttribute("user", currentUser);
 		return "register";
 	}
 
@@ -102,5 +109,21 @@ public class WebController extends WebMvcConfigurerAdapter {
 	public ModelAndView checkNewUser() {
 		User user = userService.getUser("user");
 		return new ModelAndView("checknewuser", "user", user);
+	}
+
+	@PostMapping("/newMessage")
+	public String sendNewMessage(@Valid Message message, BindingResult bindingResult) {
+
+		message.setSender(currentUser);
+		message.set
+
+		try {
+			messageService.sendMessage(message);
+		} catch (Exception exception) {
+			System.out.println(exception.getMessage());
+			return "newMessage";
+		}
+
+		return "redirect:sentMessages";
 	}
 }
