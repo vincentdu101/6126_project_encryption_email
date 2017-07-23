@@ -1,11 +1,14 @@
 package hello;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
@@ -41,7 +44,13 @@ public class User {
 	@Lob
 	private byte[] privateKey;
 
-	public User() {
+	@OneToMany(mappedBy = "sender")
+	public List<Message> sentMessages;
+
+	@OneToMany(mappedBy = "receiver")
+	public List<Message> receivedMessages;
+
+	protected User() {
 	}
 
 	public User(String username, String password) {
@@ -95,6 +104,22 @@ public class User {
 
 	public void setPrivateKey(byte[] privateKey) {
 		this.privateKey = privateKey;
+	}
+
+	public List<Message> getSentMessages() {
+		return sentMessages;
+	}
+
+	public void setSentMessages(List<Message> sentMessages) {
+		this.sentMessages = sentMessages;
+	}
+
+	public List<Message> getReceivedMessages() {
+		return receivedMessages;
+	}
+
+	public void setReceivedMessages(List<Message> receivedMessages) {
+		this.receivedMessages = receivedMessages;
 	}
 
 	@Override

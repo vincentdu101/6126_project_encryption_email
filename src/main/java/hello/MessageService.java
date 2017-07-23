@@ -1,19 +1,31 @@
 package hello;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by vdu on 7/22/17.
- */
 @Service
 public class MessageService {
 
-//    @Autowired
+	@Autowired
+	private MessageRepository messageRepo;
 
-    public void sendMessage(Message message) {
-        System.out.println("sending message " + message.getPlaintext());
-    }
+	public void addMessage(Message message) {
+		String sendCiphertext = PgpAlgorithmUtils.encrypt(message.getPlaintext(), message.getSender().getPublicKey());
+		message.setSendCiphertext(sendCiphertext);
 
+		String recCiphertext = PgpAlgorithmUtils.encrypt(message.getPlaintext(), message.getReceiver().getPublicKey());
+		message.setRecCiphertext(recCiphertext);
 
+		messageRepo.save(message);
+	}
+
+	public List<Message> getUsersReceivedMessages(User receiver) {
+		return messageRepo.findByReceiver(receiver);
+	}
+
+	public List<Message> getUsersSentMessages(User sender) {
+		return messageRepo.findBySender(sender);
+	}
 }

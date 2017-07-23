@@ -1,14 +1,10 @@
 package hello;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
 
-import org.bouncycastle.openpgp.PGPException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -25,13 +21,8 @@ import hello.UserService.NonUniqueUsernameException;
 @Controller
 public class WebController extends WebMvcConfigurerAdapter {
 
-	User currentUser;
-
 	@Autowired
 	private UserService userService;
-
-	@Autowired
-	private MessageService messageService;
 
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
@@ -40,53 +31,41 @@ public class WebController extends WebMvcConfigurerAdapter {
 
 	@GetMapping("/")
 	public String signinForm(final ModelMap model) {
-		currentUser = new User();
-		model.addAttribute("user", currentUser);
+		model.addAttribute("user", new User());
 		return "signin";
 	}
 
 	@GetMapping("/register")
 	public String registerForm(final ModelMap model) {
-		currentUser = new User();
-		model.addAttribute("user", currentUser);
+		model.addAttribute("user", new User());
 		return "register";
 	}
 
 	@GetMapping("/receivedMessages")
 	public String viewReceivedMessages(final ModelMap model) {
 
-		/*
-		 * List<Message> messages = new ArrayList<>(); User sender = new
-		 * User("omega@ymail.com", "omg"); messages.add(new Message(1, "HI",
-		 * "odssdfosdf34234234", sender)); messages.add(new Message(2,
-		 * "HI there world", "odssdfosdasdsdf34234234", sender));
-		 * messages.add(new Message(3, "Hello world",
-		 * "odssdfossddsfdasdsdf34234234", sender));
-		 */
-
-		User loggedIn = userService.getUser("omega@ymail.com");
 		List<Message> messages = new ArrayList<>();
-		messages = messageService.getUsersReceivedMessages(loggedIn);
+		User sender = new User("omega@ymail.com", "omg");
+		messages.add(new Message(1, "HI", "odssdfosdf34234234", sender));
+		messages.add(new Message(2, "HI there world", "odssdfosdasdsdf34234234", sender));
+		messages.add(new Message(3, "Hello world", "odssdfossddsfdasdsdf34234234", sender));
+
 		model.addAttribute("messages", messages);
+
 		return "receivedMessages";
 	}
 
 	@GetMapping("/sentMessages")
 	public String viewSentMessages(final ModelMap model) {
 
-		/*
-		 * List<Message> messages = new ArrayList<>(); User sender = new
-		 * User("omega@ymail.com", "omg"); messages.add(new Message(1, "HI",
-		 * "odssdfosdf34234234", sender)); messages.add(new Message(2,
-		 * "HI there world", "odssdfosdasdsdf34234234", sender));
-		 * messages.add(new Message(3, "Hello world",
-		 * "odssdfossddsfdasdsdf34234234", sender));
-		 */
-
-		User loggedIn = userService.getUser("omega@ymail.com");
 		List<Message> messages = new ArrayList<>();
-		messages = messageService.getUsersSentMessages(loggedIn);
+		User sender = new User("omega@ymail.com", "omg");
+		messages.add(new Message(1, "HI", "odssdfosdf34234234", sender));
+		messages.add(new Message(2, "HI there world", "odssdfosdasdsdf34234234", sender));
+		messages.add(new Message(3, "Hello world", "odssdfossddsfdasdsdf34234234", sender));
+
 		model.addAttribute("messages", messages);
+
 		return "sentMessages";
 	}
 
@@ -129,57 +108,16 @@ public class WebController extends WebMvcConfigurerAdapter {
 		User user = userService.getUser("user");
 		return new ModelAndView("checknewuser", "user", user);
 	}
-
-	@PostMapping("/newMessage")
-	public String sendNewMessage(@Valid Message message, BindingResult bindingResult) {
-
-		message.setSender(currentUser);
-//		message.set
-
-		try {
-			messageService.addMessage(message);
-		} catch (Exception exception) {
-			System.out.println(exception.getMessage());
-			return "newMessage";
-		}
-
-		return "redirect:sentMessages";
-	}
-	
-	// ROUTE FOR ADDING TEST USER AND MESSAGE VALUES
-	@GetMapping("/addtestvalues")
-	public String addTestValues() throws NoSuchAlgorithmException, NoSuchProviderException, PGPException, IOException, NonUniqueUsernameException {
-		User user = new User("user", "abc");
-		userService.addUser(user);
-		
-		User omega = new User("omega@ymail.com", "omg");
-		userService.addUser(omega);
-		User alpha = new User("alpha@ymail.com", "alp");
-		userService.addUser(alpha);
-
-		Message m1 = new Message("HI", omega, alpha);
-		messageService.addMessage(m1);
-		Message m2 = new Message("Hi there alpha", omega, alpha);
-		messageService.addMessage(m2);
-		Message m3 = new Message("Hello omega", alpha, omega);
-		messageService.addMessage(m3);
-		
-		return "redirect:/receivedMessages";
-	}
-	
 	
 	@RequestMapping("/validateuser")
 	public ModelAndView displayStuff() {
 		String s = null;
 		System.out.println("S: " + s);
-		
-		User loggingIn = userService.getUser("omega@ymail.com");
-		String username = loggingIn.getUsername();
-		String pwordHash = loggingIn.getPasswordHash();
+		User user = userService.getUser("user");
+		//System.out.println(user);
 		
 		//valid user
-		s = userService.validateUser(username,pwordHash);
-		//s = userService.validateUser("user","$2a$10$j2bNPIpbbERHK/B.ZKSukOzMU1U7/pG/t1g9avfU3QEe5JPBbLvF6");
+		s = userService.validateUser("user","$2a$10$j2bNPIpbbERHK/B.ZKSukOzMU1U7/pG/t1g9avfU3QEe5JPBbLvF6");
 		
 		//non-valid user
 		//s = userService.validateUser("user","$2a$10$j2bNPIpbbERHK/B.ZKSukOzMU1U7/pG/t1g9avfU3QEe5");
