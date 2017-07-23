@@ -25,7 +25,7 @@ import hello.UserService.NonUniqueUsernameException;
 @Controller
 public class WebController extends WebMvcConfigurerAdapter {
 
-	User currentUser;
+	User currentUser = new User();
 
 	@Autowired
 	private UserService userService;
@@ -102,11 +102,6 @@ public class WebController extends WebMvcConfigurerAdapter {
 
 	@PostMapping("/register")
 	public String registerUser(@Valid User user, BindingResult bindingResult) {
-
-		// if (bindingResult.hasErrors()) {
-		// return "register";
-		// }
-
 		try {
 			userService.addUser(user);
 		} catch (NonUniqueUsernameException e) {
@@ -130,11 +125,19 @@ public class WebController extends WebMvcConfigurerAdapter {
 		return new ModelAndView("checknewuser", "user", user);
 	}
 
+	@GetMapping("/newMessage")
+	public String newMessage(final ModelMap model) {
+	    List<User> users = userService.getAllUsers(currentUser);
+		model.addAttribute("users", users);
+		model.addAttribute("message", new Message());
+		return "newMessage";
+	}
+
+
 	@PostMapping("/newMessage")
 	public String sendNewMessage(@Valid Message message, BindingResult bindingResult) {
 
 		message.setSender(currentUser);
-//		message.set
 
 		try {
 			messageService.addMessage(message);
@@ -166,8 +169,7 @@ public class WebController extends WebMvcConfigurerAdapter {
 		
 		return "redirect:/receivedMessages";
 	}
-	
-	
+
 	@RequestMapping("/validateuser")
 	public ModelAndView displayStuff() {
 		String s = null;
@@ -178,7 +180,7 @@ public class WebController extends WebMvcConfigurerAdapter {
 		String pwordHash = loggingIn.getPasswordHash();
 		
 		//valid user
-		s = userService.validateUser(username,pwordHash);
+		s = userService.validateUser(username, pwordHash);
 		//s = userService.validateUser("user","$2a$10$j2bNPIpbbERHK/B.ZKSukOzMU1U7/pG/t1g9avfU3QEe5JPBbLvF6");
 		
 		//non-valid user

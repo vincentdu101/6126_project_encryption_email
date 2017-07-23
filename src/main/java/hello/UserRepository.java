@@ -19,6 +19,6 @@ public interface UserRepository extends CrudRepository<User, Integer> {
 
 	@Transactional(readOnly = true)
 	@Query(value = "select u from User u WHERE username = :user and password_hash = :password" )
-    public User validateUser(@Param("user") String user,@Param("password") String password);
+    public User validateUser(@Param("user") String user, @Param("password") String password);
 	
 }

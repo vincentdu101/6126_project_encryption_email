@@ -3,8 +3,9 @@ package hello;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.stream.Stream;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.bouncycastle.openpgp.PGPException;
@@ -38,7 +39,13 @@ public class UserService {
 
 		userRepo.save(user);
 	}
-	
+
+	public List<User> getAllUsers(User currentUser) {
+		List<User> users = new ArrayList<>();
+		userRepo.findAll().forEach(users::add);
+		return users.stream().filter(e -> e.getId() != currentUser.getId())
+				.collect(Collectors.toList());
+	}
 
 	class NonUniqueUsernameException extends Exception {
 		public NonUniqueUsernameException(String message) {

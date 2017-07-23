@@ -29,12 +29,19 @@
         <form action="#" th:action="@{/newMessage}" th:object="${message}" method="post">
             <table>
                 <tr>
-                    <td>Username:</td>
-                    <td><input type="text" th:field="*{title}" /></td>
-                    <td th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Title Error</td>
+                    <td>Receiver:</td>
+                    <td>
+                        <select>
+                            <option th:if="${users.size() > 0}"
+                                    th:each="user : ${users}"
+                                    th:text="${user.username}"
+                                    th:value="${user.id}"></option>
+                        </select>
+                    </td>
+                    <td th:if="${#fields.hasErrors('plaintext')}" th:errors="*{plaintext}">Plaintext Error</td>
                 </tr>
                 <tr>
-                    <td>Password:</td>
+                    <td>Message:</td>
                     <td><textarea th:field="*{plaintext}" /></td>
                     <td th:if="${#fields.hasErrors('plaintext')}" th:errors="*{plaintext}">Plaintext Error</td>
                 </tr>
