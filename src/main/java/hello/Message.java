@@ -1,6 +1,10 @@
 package hello;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Calendar;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -32,9 +36,15 @@ public class Message {
 	@Lob
 	private String recCiphertext;
 
-	private LocalDate created = LocalDate.now();
-	private LocalDate modified = LocalDate.now();
-
+	//String timeStamp = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
+	
+	//private LocalDateTime created = LocalDateTime.now();
+	private String created = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
+	//private LocalDateTime modified = LocalDateTime.now();
+	private String modified = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
+	
+	//private String modified = timeStamp;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "sender_id")
 	private User sender;
@@ -77,19 +87,19 @@ public class Message {
 		this.id = id;
 	}
 
-	public LocalDate getCreated() {
+	public String getCreated() {
 		return created;
 	}
 
-	public void setCreated(LocalDate created) {
+	public void setCreated(String created) {
 		this.created = created;
 	}
 
-	public LocalDate getModified() {
+	public String getModified() {
 		return modified;
 	}
 
-	public void setModified(LocalDate modified) {
+	public void setModified(String modified) {
 		this.modified = modified;
 	}
 
