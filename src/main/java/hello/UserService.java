@@ -6,6 +6,7 @@ import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
 import org.bouncycastle.openpgp.PGPException;
@@ -99,4 +100,5 @@ public class UserService {
 			}
 		}
     }
+
 }

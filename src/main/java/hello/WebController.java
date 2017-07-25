@@ -6,14 +6,13 @@ import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+import org.apache.http.protocol.HTTP;
 import org.bouncycastle.openpgp.PGPException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,13 +28,14 @@ import hello.UserService.NonUniqueUsernameException;
 @Controller
 public class WebController extends WebMvcConfigurerAdapter {
 
-	User currentUser = new User();
-
 	@Autowired
 	private UserService userService;
 
 	@Autowired
 	private MessageService messageService;
+
+	@Autowired
+    private SessionService sessionService;
 
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
@@ -44,75 +44,58 @@ public class WebController extends WebMvcConfigurerAdapter {
 
 	@GetMapping("/")
 	public String signinForm(final ModelMap model) {
-		currentUser = new User();
-		model.addAttribute("user", currentUser);
+		model.addAttribute("user", new User());
 		return "signin";
 	}
 
 	@GetMapping("/register")
 	public String registerForm(final ModelMap model) {
-		currentUser = new User();
-		model.addAttribute("user", currentUser);
+		model.addAttribute("user", new User());
 		return "register";
 	}
 
 	@GetMapping("/receivedMessages")
-	public String viewReceivedMessages(final ModelMap model) {
-		if (currentUser.getUsername() == null) {
+	public String viewReceivedMessages(final ModelMap model, HttpSession session) {
+	    if (!sessionService.isLoggedIn(session)) {
 			return "redirect:/";
 		}
-		List<Message> messages = new ArrayList<>();
-		messages = messageService.getUsersReceivedMessages(currentUser);
+		User currentUser = (User) session.getAttribute("currentUser");
+		List<Message> messages = messageService.getUsersReceivedMessages(currentUser);
 		model.addAttribute("messages", messages);
 		return "receivedMessages";
 	}
 
 	@GetMapping("/sentMessages")
-	public String viewSentMessages(final ModelMap model) {
+	public String viewSentMessages(final ModelMap model, HttpSession session) {
 
-		if (currentUser.getUsername() == null) {
+		if (!sessionService.isLoggedIn(session)) {
 			return "redirect:/";
 		}
-	
-		List<Message> messages = new ArrayList<>();
-		messages = messageService.getUsersSentMessages(currentUser);
+
+        User currentUser = (User) session.getAttribute("currentUser");
+		List<Message> messages = messageService.getUsersSentMessages(currentUser);
 		model.addAttribute("messages", messages);
 		return "sentMessages";
 	}
 
 	@PostMapping("/")
-	public String loginAction(@RequestParam String username, @RequestParam String password) {
+	public String loginAction(@RequestParam String username, @RequestParam String password, HttpSession session) {
 		User logIn = userService.verifyPassword(username, password);
 		if (logIn != null) {
-			currentUser = logIn;
-			currentUser.setPassword(password);
+			logIn.setPassword(password);
+			session.setAttribute("currentUser", logIn);
 			return "redirect:/receivedMessages";
 		}
 		else {
 			return "redirect:/";
 		}
-		
-        /*try {
-            User user = new User(username, password);
-            User foundUser = userService.getUser(username);
-            if (userService.verifyPassword(foundUser, user)) {
-                currentUser = foundUser;
-            } else {
-                return "redirect:/";
-            }
-        } catch(Exception exception) {
-            System.out.println(exception.getMessage());
-            return "redirect:/";
-        }
-
-		return "redirect:/receivedMessages";*/
 	}
 
 	@PostMapping("/register")
-	public String registerUser(@Valid User user, BindingResult bindingResult) {
+	public String registerUser(@Valid User user, BindingResult bindingResult, HttpSession session) {
 		try {
 			userService.addUser(user);
-			currentUser = user;
+			session.setAttribute("currentUser", user);
 		} catch (NonUniqueUsernameException e) {
 			bindingResult.rejectValue("username", "username", e.getMessage());
 			return "register";
@@ -135,7 +118,12 @@ public class WebController extends WebMvcConfigurerAdapter {
 	}
 
 	@GetMapping("/newMessage")
-	public String newMessage(final ModelMap model) {
+	public String newMessage(final ModelMap model, HttpSession session) {
+        if (!sessionService.isLoggedIn(session)) {
+            return "redirect:/";
+        }
+
+        User currentUser = (User) session.getAttribute("currentUser");
 	    List<User> users = userService.getAllUsers(currentUser);
 		model.addAttribute("users", users);
 		model.addAttribute("message", new Message());
@@ -144,7 +132,8 @@ public class WebController extends WebMvcConfigurerAdapter {
 
 
 	@PostMapping("/newMessage")
-	public String sendNewMessage(@RequestParam String receiverId, @RequestParam String plaintext) {
+	public String sendNewMessage(@RequestParam String receiverId, @RequestParam String plaintext, HttpSession session) {
+        User currentUser = (User) session.getAttribute("currentUser");
 	    Message message = new Message();
 	    message.setSender(currentUser);
 	    message.setReceiver(userService.getUserById(receiverId));
@@ -224,5 +213,11 @@ public class WebController extends WebMvcConfigurerAdapter {
 	public String display2Stuff() {
 		return "123";
 	}
+
+	@RequestMapping("/logout")
+    public String logoutSession(HttpSession session) {
+	    session.removeAttribute("currentUser");
+	    return "redirect:/";
+    }
 
 }
