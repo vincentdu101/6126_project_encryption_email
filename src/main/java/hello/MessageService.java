@@ -22,10 +22,18 @@ public class MessageService {
 	}
 
 	public List<Message> getUsersReceivedMessages(User receiver) {
-		return messageRepo.findByReceiver(receiver);
+		List<Message> recMessages = messageRepo.findByReceiver(receiver);
+		for (Message message: recMessages) {
+			message.setDecryptedText(PgpAlgorithmUtils.decrypt(message.getRecCiphertext(), receiver.getPrivateKey(), receiver.getPassword()));
+		}		
+		return recMessages;
 	}
 
 	public List<Message> getUsersSentMessages(User sender) {
-		return messageRepo.findBySender(sender);
+		List<Message> sentMessages = messageRepo.findBySender(sender);
+		for (Message message: sentMessages) {
+			message.setDecryptedText(PgpAlgorithmUtils.decrypt(message.getSendCiphertext(), sender.getPrivateKey(), sender.getPassword()));
+		}		
+		return sentMessages;
 	}
 }

@@ -27,7 +27,7 @@ public class Message {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
 
-	// @Transient
+	@Transient
 	private String plaintext;
 
 	@Lob
@@ -35,6 +35,9 @@ public class Message {
 
 	@Lob
 	private String recCiphertext;
+	
+	@Transient
+	private String decryptedText;
 
 	//String timeStamp = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
 	
@@ -139,6 +142,14 @@ public class Message {
 
 	public void setRecCiphertext(String recCiphertext) {
 		this.recCiphertext = recCiphertext;
+	}
+
+	public String getDecryptedText() {
+		return decryptedText;
+	}
+
+	public void setDecryptedText(String decryptedText) {
+		this.decryptedText = decryptedText;
 	}
 
 }

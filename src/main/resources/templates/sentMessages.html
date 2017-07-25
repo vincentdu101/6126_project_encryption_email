@@ -46,7 +46,7 @@
         <tr th:each="message : ${messages}">
             <td th:text="${message.id}"></td>
             <td th:text="${message.created}"></td>
-            <td th:text="${message.plaintext}"></td>
+            <td th:text="${message.decryptedText}"></td>
             <td th:text="${message.sender.username}"></td>
         </tr>
         </tbody>

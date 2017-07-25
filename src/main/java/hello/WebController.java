@@ -58,16 +58,9 @@ public class WebController extends WebMvcConfigurerAdapter {
 
 	@GetMapping("/receivedMessages")
 	public String viewReceivedMessages(final ModelMap model) {
-
-		/*
-		 * List<Message> messages = new ArrayList<>(); User sender = new
-		 * User("omega@ymail.com", "omg"); messages.add(new Message(1, "HI",
-		 * "odssdfosdf34234234", sender)); messages.add(new Message(2,
-		 * "HI there world", "odssdfosdasdsdf34234234", sender));
-		 * messages.add(new Message(3, "Hello world",
-		 * "odssdfossddsfdasdsdf34234234", sender));
-		 */
-
+		if (currentUser.getUsername() == null) {
+			return "redirect:/";
+		}
 		List<Message> messages = new ArrayList<>();
 		messages = messageService.getUsersReceivedMessages(currentUser);
 		model.addAttribute("messages", messages);
@@ -77,14 +70,10 @@ public class WebController extends WebMvcConfigurerAdapter {
 	@GetMapping("/sentMessages")
 	public String viewSentMessages(final ModelMap model) {
 
-		/*
-		 * List<Message> messages = new ArrayList<>(); User sender = new
-		 * User("omega@ymail.com", "omg"); messages.add(new Message(1, "HI",
-		 * "odssdfosdf34234234", sender)); messages.add(new Message(2,
-		 * "HI there world", "odssdfosdasdsdf34234234", sender));
-		 * messages.add(new Message(3, "Hello world",
-		 * "odssdfossddsfdasdsdf34234234", sender));
-		 */
+		if (currentUser.getUsername() == null) {
+			return "redirect:/";
+		}
+	
 		List<Message> messages = new ArrayList<>();
 		messages = messageService.getUsersSentMessages(currentUser);
 		model.addAttribute("messages", messages);
@@ -96,6 +85,7 @@ public class WebController extends WebMvcConfigurerAdapter {
 		User logIn = userService.verifyPassword(username, password);
 		if (logIn != null) {
 			currentUser = logIn;
+			currentUser.setPassword(password);
 			return "redirect:/receivedMessages";
 		}
 		else {
@@ -122,6 +112,7 @@ public class WebController extends WebMvcConfigurerAdapter {
 	public String registerUser(@Valid User user, BindingResult bindingResult) {
 		try {
 			userService.addUser(user);
+			currentUser = user;
 		} catch (NonUniqueUsernameException e) {
 			bindingResult.rejectValue("username", "username", e.getMessage());
 			return "register";
