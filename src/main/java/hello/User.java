@@ -29,7 +29,7 @@ public class User {
 
 	@Transient
 	@NotNull
-	@Size(min = 3)
+	@Size(min = 7)
 	private String password;
 
 	@NotNull

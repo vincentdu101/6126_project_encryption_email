@@ -173,12 +173,12 @@ public class WebController extends WebMvcConfigurerAdapter {
 	// ROUTE FOR ADDING TEST USER AND MESSAGE VALUES
 	@GetMapping("/addtestvalues")
 	public String addTestValues() throws NoSuchAlgorithmException, NoSuchProviderException, PGPException, IOException, NonUniqueUsernameException {
-		User user = new User("user", "abc");
+		User user = new User("user", "abcabcd");
 		userService.addUser(user);
 		
-		User omega = new User("omega@ymail.com", "omg");
+		User omega = new User("omega@ymail.com", "omgabcd");
 		userService.addUser(omega);
-		User alpha = new User("alpha@ymail.com", "alp");
+		User alpha = new User("alpha@ymail.com", "alpabcd");
 		userService.addUser(alpha);
 
 		Message m1 = new Message("HI", omega, alpha);
