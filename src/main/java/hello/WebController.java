@@ -47,6 +47,12 @@ public class WebController extends WebMvcConfigurerAdapter {
 		model.addAttribute("user", new User());
 		return "signin";
 	}
+	
+	@GetMapping("/signinfail")
+	public String signinForm2(final ModelMap model) {
+		model.addAttribute("user", new User());
+		return "signinfail";
+	}
 
 	@GetMapping("/register")
 	public String registerForm(final ModelMap model) {
@@ -87,10 +93,25 @@ public class WebController extends WebMvcConfigurerAdapter {
 			return "redirect:/receivedMessages";
 		}
 		else {
-			return "redirect:/";
+			System.out.println("Bad Login Info");;
+			return "redirect:/signinfail";
 		}
 	}
 
+	@PostMapping("/signinfail")
+	public String loginAction2(@RequestParam String username, @RequestParam String password, HttpSession session) {
+		User logIn = userService.verifyPassword(username, password);
+		if (logIn != null) {
+			logIn.setPassword(password);
+			session.setAttribute("currentUser", logIn);
+			return "redirect:/receivedMessages";
+		}
+		else {
+			System.out.println("Bad Login Info");;
+			return "redirect:/signinfail";
+		}
+	}
+	
 	@PostMapping("/register")
 	public String registerUser(@Valid User user, BindingResult bindingResult, HttpSession session) {
 		try {
@@ -209,15 +230,15 @@ public class WebController extends WebMvcConfigurerAdapter {
 	}
 	
 	
-	@RequestMapping("/12345")
-	public String display2Stuff() {
-		return "123";
-	}
-
 	@RequestMapping("/logout")
     public String logoutSession(HttpSession session) {
 	    session.removeAttribute("currentUser");
 	    return "redirect:/";
-    }
+}
+	@RequestMapping("/decryptMessages")
+	public ModelAndView display2Stuff() {
+		User user = userService.getUser("IanFogelman@gmail.com");
+		return new ModelAndView("decryptMessages","user",user);
+	}
 
 }
