@@ -11,7 +11,7 @@
     <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-    <a class="navbar-brand" href="#">My Encryption App</a>
+    <a class="navbar-brand" href="#"><p th:text="${currentUser.username} + '\'s Encryption App'"/></a>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
             <li class="nav-item">
@@ -31,7 +31,7 @@
 </nav>
 
 <div class="container">
-    <h2>My Received Messages</h2>
+    <h2 th:text="${currentUser.username} + '\'s Received Messages'"/>
     <p>Here is a summary of your received messages:</p>
 
     <table class="table">

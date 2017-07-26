@@ -68,6 +68,7 @@ public class WebController extends WebMvcConfigurerAdapter {
 		User currentUser = (User) session.getAttribute("currentUser");
 		List<Message> messages = messageService.getUsersReceivedMessages(currentUser);
 		model.addAttribute("messages", messages);
+		model.addAttribute("currentUser", session.getAttribute("currentUser"));
 		return "receivedMessages";
 	}
 
@@ -81,6 +82,7 @@ public class WebController extends WebMvcConfigurerAdapter {
         User currentUser = (User) session.getAttribute("currentUser");
 		List<Message> messages = messageService.getUsersSentMessages(currentUser);
 		model.addAttribute("messages", messages);
+		model.addAttribute("currentUser", session.getAttribute("currentUser"));
 		return "sentMessages";
 	}
 
@@ -93,7 +95,8 @@ public class WebController extends WebMvcConfigurerAdapter {
 			return "redirect:/receivedMessages";
 		}
 		else {
-			System.out.println("Bad Login Info");;
+			System.out.println("Bad Login Info");
+			session.removeAttribute("currentUser");
 			return "redirect:/signinfail";
 		}
 	}
@@ -107,7 +110,8 @@ public class WebController extends WebMvcConfigurerAdapter {
 			return "redirect:/receivedMessages";
 		}
 		else {
-			System.out.println("Bad Login Info");;
+			System.out.println("Bad Login Info");
+			session.removeAttribute("currentUser");
 			return "redirect:/signinfail";
 		}
 	}
@@ -131,13 +135,6 @@ public class WebController extends WebMvcConfigurerAdapter {
 		return "redirect:/receivedMessages";
 	}
 
-	// TEST URL FOR NEW USER
-	@GetMapping("/checknewuser")
-	public ModelAndView checkNewUser() {
-		User user = userService.getUser("user");
-		return new ModelAndView("checknewuser", "user", user);
-	}
-
 	@GetMapping("/newMessage")
 	public String newMessage(final ModelMap model, HttpSession session) {
         if (!sessionService.isLoggedIn(session)) {
@@ -148,6 +145,7 @@ public class WebController extends WebMvcConfigurerAdapter {
 	    List<User> users = userService.getAllUsers(currentUser);
 		model.addAttribute("users", users);
 		model.addAttribute("message", new Message());
+		model.addAttribute("currentUser", session.getAttribute("currentUser"));
 		return "newMessage";
 	}
 
