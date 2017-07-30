@@ -8,7 +8,7 @@ The development build uses the in-memory h2 database.
 
 ### Start app
 mvn spring-boot:run
-*app is atarted when :" Started Application in x seconds (JVM running for x)" is displayed*
+*app is started when "Started Application in x seconds (JVM running for x)" is displayed*
 
 in browser, navigate to the app's homepage at localhost:8080/
 
